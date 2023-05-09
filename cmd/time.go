@@ -11,6 +11,7 @@ import (
 
 var calculateTime string
 var duration string
+var layout = "2006-01-02 15:04:05"
 
 var timeCmd = &cobra.Command{
 	Use:   "time",
@@ -37,34 +38,36 @@ var calculateTimeCmd = &cobra.Command{
 	Short: "计算所需时间",
 	Long:  "计算所需时间",
 	Run: func(cmd *cobra.Command, args []string) {
-		var currentTimer time.Time
-		var layout = "2006-01-02 15:04:05"
-		// 如果待计算时间为空，则当前时间作为待计算时间
-		// 否则以拿到的待计算时间进行计算
-		if calculateTime == "" {
-			currentTimer = timer.GtNowTime()
-		} else {
-			spaceCnt := strings.Count(calculateTime, " ")
-			if spaceCnt == 0 {
-				layout = "2006-01-02"
-			}
-			if spaceCnt == 1 {
-				layout = "2006-01-02 15:04:05"
-			}
-			var err error
-			currentTimer, err = time.Parse(layout, calculateTime)
-			if err != nil {
-				t, _ := strconv.Atoi(calculateTime)
-				currentTimer = time.Unix(int64(t), 0)
-			}
-		}
-		// 主要计算逻辑
+		currentTimer := getCurrentTime()
 		t, err := timer.GetCalculateTime(currentTimer, duration)
 		if err != nil {
 			log.Fatalf("timer.GetCalculateTime err: %v", err)
 		}
 		log.Printf("输出结果: %s, %d", t.Format(layout), t.Unix())
 	},
+}
+
+func getCurrentTime() time.Time {
+	var currentTimer time.Time
+	// 如果待计算时间为空，则当前时间作为待计算时间
+	if calculateTime == "" {
+		currentTimer = timer.GtNowTime()
+	} else {
+		spaceCnt := strings.Count(calculateTime, " ")
+		if spaceCnt == 0 {
+			layout = "2006-01-02"
+		}
+		if spaceCnt == 1 {
+			layout = "2006-01-02 15:04:05"
+		}
+		var err error
+		currentTimer, err = time.Parse(layout, calculateTime)
+		if err != nil {
+			t, _ := strconv.Atoi(calculateTime)
+			currentTimer = time.Unix(int64(t), 0)
+		}
+	}
+	return currentTimer
 }
 
 func init() {

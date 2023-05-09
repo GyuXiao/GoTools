@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-// 预定义模板
+// 预定义模板（模板的格式很重要！！）
 const structTpl = `type {{.TableName | ToCamelCase}} struct {
 {{range .Columns}}	{{ $length := len .Comment}} {{ if gt $length 0 }}// {{.Comment}} {{else}}// {{.Name}} {{ end }}
 	{{ $typeLen := len .Type }} {{ if gt $typeLen 0 }}{{.Name | ToCamelCase}}	{{.Type}}	{{.Tag}}{{ else }}{{.Name}}{{ end }}
@@ -24,9 +24,9 @@ type StructTemplate struct {
 // 存储转换后的 Go 结构体中的所有字段信息
 
 type StructColumn struct {
-	Name string
-	Type string
-	Tag string
+	Name    string
+	Type    string
+	Tag     string
 	Comment string
 }
 
@@ -34,7 +34,7 @@ type StructColumn struct {
 
 type StructTemplateDB struct {
 	TableName string
-	Columns []*StructColumn
+	Columns   []*StructColumn
 }
 
 func NewStructTemplate() *StructTemplate {
@@ -62,9 +62,7 @@ func (t *StructTemplate) AssemblyColumns(tbColumns []*TableColumn) []*StructColu
 // 最后组装符合预定义模板的模板对象，再调用 Execute 方法进行渲染
 
 func (t *StructTemplate) Generate(tableName string, tplColumns []*StructColumn) error {
-	tpl := template.Must(template.New("sql2struct").Funcs(template.FuncMap{
-		"ToCamelCase": word.UnderscoreToUpperCamelCase,
-	}).Parse(t.structTpl))
+	tpl := template.Must(template.New("sql2struct").Funcs(template.FuncMap{"ToCamelCase": word.UnderscoreToUpperCamelCase}).Parse(t.structTpl))
 	tplDB := StructTemplateDB{
 		TableName: tableName,
 		Columns:   tplColumns,

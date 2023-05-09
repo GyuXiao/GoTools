@@ -45,14 +45,15 @@ func (m *DBModel) Connect() error {
 	var err error
 	s := "%s:%s@tcp(%s)/information_schema?" +
 		"charset=%s&parseTime=True&loc=Local"
-	dsn := fmt.Sprintf(
+	dataSourceName := fmt.Sprintf(
 		s,
 		m.DBInfo.UserName,
 		m.DBInfo.Password,
 		m.DBInfo.Host,
 		m.DBInfo.Charset,
 	)
-	m.DBEngine, err = sql.Open(m.DBInfo.DBType, dsn)
+	// 这里的 DBType，默认是 mysql
+	m.DBEngine, err = sql.Open(m.DBInfo.DBType, dataSourceName)
 	if err != nil {
 		return err
 	}
